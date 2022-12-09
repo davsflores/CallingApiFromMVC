@@ -1,0 +1,112 @@
+﻿@{
+    ViewBag.Title = "Student";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<h2>Add a student</h2>
+<div class="form-group" style="display:none;">
+    <input id="txtStudentId" class="form-control" name="StudentId" />
+</div>
+<div class="form-group">
+    <label for="Name">Name:</label>
+    <input id="txtStudentName" class="form-control" name="Name" />
+</div>
+<div class="form-group">
+    <label for="Roll">Roll:</label>
+    <input id="txtStudentRoll" class="form-control" name="Roll" />
+</div>
+<div class="text-center panel-body">
+    <button id="btnSave" class="btn btn-sm btn-primary">Save</button>
+</div>
+
+<button onclick="GetAllStudent()" class="btn btn-primary">Load Students</button>
+
+<br/>
+
+<h2>Student List</h2>
+<table id="tblStudent" class="table table-sm table-striped table-bordered m-2">
+    <thead>
+        <tr>
+            <th>Student Id</th>
+            <th>Name</th>
+            <th>Roll</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+
+
+</table>
+
+<script type="text/javascript">
+$(document).ready(function(){
+
+});
+
+function GetAllStudents(){
+    $.getJSON("/Students/GetAllStudents", function (students){
+        $("#tblStudent tbody tr").remove();
+        $.map(students, function (student){
+            $("#tblStudent tbody").append("<tr"
+            + "<td>" + student.studentId + "</td>"
+            + "<td>" + student.name + "</td>"
+            + "<td>" + student.roll + "</td>"
+            + "<td>"
+            + " <button class= 'button-success' onclick='edit(" + student.studentId + ")' style='margin-right:5px;'>Edit</button> "
+            + " <button class= 'button-danger' onclick='Delete(" + student.studentId + ")'>Delete</button> "
+            + " </td>"
+            + " </tr>");
+           
+        });
+
+    });
+
+}
+
+function Edit(studentId){
+    if (studentId>0){
+        $.getJSON("/Students/GetById?studentId=" + studentId, function(student){
+            $("#txtStudentId").val(student.studentId);
+             $("#txtStudentName").val(student.studentname);
+                $("#txtStudentRoll").val(student.studentroll);
+
+        });
+    }
+}
+
+    function Delete(studentId) {
+        if (studentId > 0) {
+            $.ajax({
+                url: '/Students/Delete?studentId=' + studentId,
+                type:'Delete',
+                dataType:'json',
+                success:function (data){
+
+                },
+                error: function (ex){
+                    console.log('Error in Operation');
+                }
+            });
+        }
+    }
+
+    $("#btnSave").click(function(){
+        var oStudent={
+            StudentId: $("#txtStudentId").val(),
+            Name: $("#txtStudentName").val(),
+            Roll: $("#txtStudentRoll").val(),
+        };
+        
+        $.post("/Students/AddUpdateStudent", oStudent)
+        .done(function(data){
+            GetAllStudents
+        });
+
+    });
+
+
+
+
+
+</script>
